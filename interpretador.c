@@ -13,22 +13,30 @@ void quitHandler(int sinal);
 int main(){
 
 	Processo* processo1;
-	processo1 = (Processo*)malloc(sizeof(Processo));
 	int segmento1, segmento2;
 	Processo *p;
 	int *pid;
-	segmento1 = shmget(8778, sizeof(Processo), IPC_CREAT | IPC_EXCL | S_IRWXU);
-	p = (Processo*)shmat(segmento1, 0, 0);
-
 	char comando[50];
 	char temp1[50];
 	char *temp2;
 	int numTemp;
 	int j = 0;
 
+	processo1 = (Processo*)malloc(sizeof(Processo));
+	if(!processo1){
+        printf("Falta de memoria\n");
+        exit(1);
+    }
+
+	// Segmento de memória compartilhada onde o processo será escrito
+	segmento1 = shmget(8778, sizeof(Processo), IPC_CREAT | IPC_EXCL | S_IRWXU);
+	p = (Processo*)shmat(segmento1, 0, 0);	
+
+	// Segmento de memória compartilhada com o pid do escalonador
 	segmento2 = shmget(8779, sizeof(int), IPC_CREAT | S_IRWXU);
 	pid = (int*)shmat(segmento2, 0, 0);
 
+	// Sinais de fim do programa pelo teclado
 	signal(SIGQUIT, quitHandler);
 	signal(SIGINT, quitHandler);
 
@@ -36,15 +44,14 @@ int main(){
 
 		j = 0;
 
-		scanf("%50[^\n]", comando);
+		scanf("%50[^\n]", comando);	// Lê o comando
 		while ( getchar() != '\n' );
 
+		// Pegando as rajadas
 		strcpy(temp1, comando);
 
 		temp2 = strtok(temp1, " ");
 		temp2 = strtok(NULL, "(");
-
-		//strcpy(processo1->nome, temp2);
 
 		temp2 = strtok(NULL, ",");
 		while(temp2 != NULL){
@@ -58,15 +65,16 @@ int main(){
 			j++;
 		}
 
+		// Informações padrão de um processo recém criado
 		processo1->fila = 1;
 		processo1->prox_fila = 2;
 		processo1->estado = novo;
 		processo1->pid = 1;
 
+		// Guardando na memória compartilhada
 		*p = *processo1;
 
-		printf("\n%d\n", *pid);
-
+		// Avisa ao escalonador que há um novo processo
 		kill(*pid, SIGUSR1);
 	}
 	shmdt(p);
@@ -81,48 +89,6 @@ void quitHandler(int sinal)
 	segmento = shmget(8779, 0, S_IRWXU);
 	shmctl(segmento, IPC_RMID, 0);
 
-	printf("Terminando...\n");
+	printf("\nTerminando...\n");
 	exit (0);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

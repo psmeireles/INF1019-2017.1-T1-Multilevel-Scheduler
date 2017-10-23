@@ -8,7 +8,6 @@ typedef enum estado{
 } Estado;
 
 typedef struct Processo{
-
 	int rajadas[50];
 	int fila;
 	int prox_fila;
