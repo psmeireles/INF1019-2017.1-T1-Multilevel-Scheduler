@@ -8,14 +8,16 @@
 #include <string.h>
 #include "processo.h"
 
+void quitHandler(int sinal);
+
 int main(){
 
 	Processo* processo1;
 	processo1 = (Processo*)malloc(sizeof(Processo));
 	int segmento1, segmento2;
 	Processo *p;
-	int pid;
-	segmento1 = shmget(8766, sizeof(Processo), IPC_CREAT | IPC_EXCL | S_IRWXU);
+	int *pid;
+	segmento1 = shmget(8778, sizeof(Processo), IPC_CREAT | IPC_EXCL | S_IRWXU);
 	p = (Processo*)shmat(segmento1, 0, 0);
 
 	char comando[50];
@@ -24,8 +26,11 @@ int main(){
 	int numTemp;
 	int j = 0;
 
-	segmento2 = shmget(8753, sizeof(int), IPC_CREAT | IPC_EXCL | S_IRWXU);
-	pid = shmat(segmento2, 0, 0);
+	segmento2 = shmget(8779, sizeof(int), IPC_CREAT | S_IRWXU);
+	pid = (int*)shmat(segmento2, 0, 0);
+
+	signal(SIGQUIT, quitHandler);
+	signal(SIGINT, quitHandler);
 
 	while(1){
 
@@ -48,16 +53,36 @@ int main(){
 			temp2 = strtok(NULL, ",");
 			j++;
 		}
+		while(j <= 49){
+			processo1->rajadas[j] = 0;
+			j++;
+		}
 
-		processo1->rajadas_restantes = j;
-		//processo1->tempo_restante = processo1->rajadas[0];
 		processo1->fila = 1;
+		processo1->prox_fila = 2;
+		processo1->estado = novo;
+		processo1->pid = 1;
 
 		*p = *processo1;
 
-		//kill(pid, SIGUSR1);
+		printf("\n%d\n", *pid);
+
+		kill(*pid, SIGUSR1);
 	}
 	shmdt(p);
+}
+
+void quitHandler(int sinal)
+{
+	int segmento;
+	segmento = shmget(8778, 0, S_IRWXU);
+	shmctl(segmento, IPC_RMID, 0);
+
+	segmento = shmget(8779, 0, S_IRWXU);
+	shmctl(segmento, IPC_RMID, 0);
+
+	printf("Terminando...\n");
+	exit (0);
 }
 
 
