@@ -57,11 +57,7 @@ int main(){
     *pid = pid_escalonador;
     
     while(1){
-<<<<<<< HEAD
     	if(fila_vazia(level1) && fila_vazia(level2) && fila_vazia(level3)){
-=======
-    	if(fila_vazia(level1) && fila_vazia(level1) && fila_vazia(level1)){
->>>>>>> e657c0d741e58b4445a8175e7a87af7efeb951b4
     		printf("Dormindo\n");
     		pause();
 		}
