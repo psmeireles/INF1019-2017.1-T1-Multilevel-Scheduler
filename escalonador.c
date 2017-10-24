@@ -57,6 +57,10 @@ int main(){
     *pid = pid_escalonador;
     
     while(1){
+    	if(fila_vazia(level1) && fila_vazia(level1) && fila_vazia(level1)){
+    		printf("Dormindo\n");
+    		pause();
+		}
         RoundRobin(level1);
         RoundRobin(level2);
         RoundRobin(level3);

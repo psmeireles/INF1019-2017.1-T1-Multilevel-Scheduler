@@ -22,7 +22,8 @@ Após guardar as informações sobre o novo processo na memória compartilhada, 
 o escalonador para que este saiba que existe um novo processo a ser escalonado.
 	O escalonador, ao ser iniciado, escreve seu pid na região de memória compartilhada que será lida
 pelo interpretador. Ele cria os níveis do escalonador, que são representados por filas. O resto do 
-programa é um loop que executa um RoundRobin em cada fila.
+programa é um loop que executa um RoundRobin em cada fila. Se não houver nenhum processo em nenhuma
+fila o escalonador dorme até receber um processo do interpretador.
 	Antes de começar o RoundRobin verifica-se se existe algum processo em uma fila superior, para que
 se interrompa o RoundRobin no nível atual e os programas do nível superior sejam executados. Essa
 verificação também é feita após a execução de cada programa.
