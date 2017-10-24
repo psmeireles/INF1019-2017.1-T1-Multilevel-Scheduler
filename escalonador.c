@@ -134,6 +134,7 @@ int ExecutarProcesso(Processo *p, int t){    // Executa um novo processo ou cont
     // Determinando quais sinais serão ouvidos durante o sleep
     sigemptyset(&mask);
     sigaddset(&mask, SIGUSR2);
+    sigaddset(&mask, SIGUSR1);
     sigaddset(&mask, SIGCHLD);
     sigaddset(&mask, SIGALRM);
 
@@ -279,7 +280,7 @@ void newProcessHandler(int signal){
         printf("Falta de memoria\n");
         exit(1);
     }
-
+    
     segmento = shmget(8778, sizeof(Processo), IPC_CREAT | S_IRWXU);
     p = (Processo*)shmat(segmento, 0, 0);
 
