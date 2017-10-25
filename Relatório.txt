@@ -6,9 +6,8 @@ Pedro Sousa Meireles	-	1510962
 Julio Neuman Kessel 	-	1511745
 
 Modo de usar:
-	Abra dois terminais. No primeiro, digite os comandos "gcc -o escalonador escalonador.c fila.c" e então "./escalonador".
-	No segundo, digite os comandos "gcc -o interpretador interpretador.c" e então "./interpretador".
-	No segundo terminal devem ser executados os comandos da forma "exec programa (3, 2, 1)". O resultado
+	Abra dois terminais. No primeiro, digite os comandos "gcc -o escalonador escalonador.c fila.c" e então "./escalonador". No segundo, digite os comandos "gcc -o interpretador interpretador.c" e então "./interpretador".
+No segundo terminal devem ser executados os comandos da forma "exec programa (3, 2, 1)". O resultado
 do escalonamento dos programas digitados no interpretador será exibido no primeiro terminal.
 	Para encerrar o programa digite o comando ctrl+c em cada um dos terminais.
 
@@ -61,3 +60,279 @@ e retornar um valor condizente, informando que a memória alocada deve ser liber
 O tratador libera toda a memória alocada, além de limpar a memória compartilhada e exibir uma mensagem de término.
 	
 	No interpretador foram utilizados apenas os dois últimos sinais, com o mesmo tratador.
+
+Testes:
+
+	Teste 1)
+
+		Comandos: 
+			exec aa (5) -> em t=0
+
+		Saída:
+			Dormindo
+
+			L1
+			44481
+
+			L2
+			44481
+			44481
+
+			L3
+			44481
+			44481
+			44481 terminou
+			Dormindo
+
+	Teste 2)
+
+		Comandos:
+			exec aa (10,5) -> em t=0
+
+		Saída:
+			Dormindo
+
+			L1
+			44491
+
+			L2
+			44491
+			44491
+
+			L3
+			44491
+			44491
+			44491
+			44491
+
+			L3
+			44491
+			44491
+			44491
+			44491 entrou em I/O
+			Dormindo
+
+			L2
+			44491
+			44491
+
+			L3
+			44491
+			44491
+			44491
+			44491 terminou
+			Dormindo
+
+	Teste 3)
+
+		Comandos:
+			exec aa (9,3) -> em t=0
+			exec bb (5,5) -> em t=5
+
+		Saída:
+			Dormindo
+
+			L1
+			44499
+
+			L2
+			44499
+			44499
+
+			L3
+			44499
+			44499
+			44499
+			44499
+
+			L1
+			44500
+
+			L2
+			44500
+			44500
+
+			L3
+			44499
+			44499
+			44499 entrou em I/O
+
+			L3
+			44500
+			44500
+			44500 entrou em I/O
+
+			L2
+			44499
+			44499
+
+			L3
+			44499
+			44499 terminou
+
+			L2
+			44500
+			44500
+
+			L3
+			44500
+			44500
+			44500
+			44500 terminou
+			Dormindo
+
+	Teste 4)
+
+		Comandos:
+			exec aa (9) -> em t=0
+			exec bb (5,5) -> em t=2
+
+		Saída:
+			Dormindo
+
+			L1
+			44505
+
+			L2
+			44505
+			44505
+
+			L1
+			44506
+
+			L2
+			44506
+			44506
+
+			L3
+			44505
+			44505
+			44505
+			44505
+
+			L3
+			44506
+			44506
+			44506 entrou em I/O
+
+			L3
+			44505
+			44505
+			44505 terminou
+
+			L2
+			44506
+			44506
+
+			L3
+			44506
+			44506
+			44506
+			44506 terminou
+			Dormindo
+
+	Teste 5)
+
+		Comandos:
+			exec aa (10,10) -> em t=0
+			exec bb (5,3) -> em t=6
+			exec cc (10,10) -> em t=15
+
+		Saída:
+			Dormindo
+
+			L1
+			44512
+
+			L2
+			44512
+			44512
+
+			L3
+			44512
+			44512
+			44512
+			44512
+
+			L1
+			44513
+			44513
+
+			L2
+			44513
+
+			L3
+			44512
+			44512
+			44512
+			44512 entrou em I/O
+
+			L3
+			44513
+			44513
+			44513 entrou em I/O
+
+			L1
+			44516
+			44516
+
+			L2
+			44512
+			44512
+			44512
+
+			L2
+			44516
+			44516
+
+			L2
+			44513
+			44513
+			44513
+
+			L3
+			44512
+			44512
+			44512
+			44512
+
+			L3
+			44516
+			44516
+			44516
+			44516
+
+			L3
+			44513 terminou
+
+			L3
+			44512
+			44512
+			44512
+			44512 terminou
+
+			L3
+			44516
+			44516
+			44516 entrou em I/O
+			Dormindo
+
+			L2
+			44516
+			44516
+
+			L3
+			44516
+			44516
+			44516
+			44516
+
+			L3
+			44516
+			44516
+			44516
+			44516
+
+			L3
+			44516 terminou
+			Dormindo
