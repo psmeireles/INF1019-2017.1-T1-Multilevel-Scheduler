@@ -6,7 +6,8 @@ Pedro Sousa Meireles	-	1510962
 Julio Neuman Kessel 	-	1511745
 
 Modo de usar:
-	Abra dois terminais. No primeiro, digite os comandos "gcc -o escalonador escalonador.c fila.c" e então "./escalonador". No segundo, digite os comandos "gcc -o interpretador interpretador.c" e então "./interpretador".
+	Abra dois terminais. No primeiro, digite os comandos "gcc -o escalonador escalonador.c fila.c" e então "./escalonador".
+	No segundo, digite os comandos "gcc -o interpretador interpretador.c" e então "./interpretador".
 No segundo terminal devem ser executados os comandos da forma "exec programa (3, 2, 1)". O resultado
 do escalonamento dos programas digitados no interpretador será exibido no primeiro terminal.
 	Para encerrar o programa digite o comando ctrl+c em cada um dos terminais.
