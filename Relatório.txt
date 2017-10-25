@@ -6,8 +6,7 @@ Pedro Sousa Meireles	-	1510962
 Julio Neuman Kessel 	-	1511745
 
 Modo de usar:
-	Abra dois terminais. No primeiro, digite os comandos "gcc -o escalonador escalonador.c fila.c" e então "./escalonador".
-	No segundo, digite os comandos "gcc -o interpretador interpretador.c" e então "./interpretador".
+	Abra dois terminais. No primeiro, digite os comandos "gcc -o escalonador escalonador.c fila.c" e então "./escalonador". No segundo, digite os comandos "gcc -o interpretador interpretador.c" e então "./interpretador".
 No segundo terminal devem ser executados os comandos da forma "exec programa (3, 2, 1)". O resultado
 do escalonamento dos programas digitados no interpretador será exibido no primeiro terminal.
 	Para encerrar o programa digite o comando ctrl+c em cada um dos terminais.
@@ -66,6 +65,9 @@ Testes:
 
 	Teste 1)
 
+		Nesse teste foi executado um unico processo com uma unica rajada, o processo executa a rajada em cada fila e conforme acaba o quantum da fila atual ele cai de prioridade.
+		Como só tem uma rajada o processo não entra em IO.
+
 		Comandos: 
 			exec aa (5) -> em t=0
 
@@ -86,6 +88,10 @@ Testes:
 			Dormindo
 
 	Teste 2)
+
+		Nesse teste ainda só foi executado um processo, mas agora com duas rajadas.
+		O comportamento dele é o mesmo que no exemplo a cima, mas agora depois da primeira rajada o processo entra em IO e depois executa a rajada seguinte.
+		Como não tem nada para ser executado alem desse unico processo, o escalonador "dorme" enquanto ele está em IO.
 
 		Comandos:
 			exec aa (10,5) -> em t=0
@@ -125,6 +131,9 @@ Testes:
 			Dormindo
 
 	Teste 3)
+
+		Nesse teste são executados dois processos distintos em tempos diferentes.
+		O comportamento é parecido com o já visto antes, mas quando o segundo processo começa sua execução ele tem prioridade sobre o primeiro processo. Isso porque o processo "bb" é inicialmente inserido na primeira fila de prioridade e nesse momento o processo "aa" está na terceira fila.
 
 		Comandos:
 			exec aa (9,3) -> em t=0
@@ -184,6 +193,8 @@ Testes:
 
 	Teste 4)
 
+		Nesse teste tambem são executados dois processos. Nesse exemplo é possivel perceber que quando os dois processos estão na ultima fila eles ficam alternando prioridade entre si conforme o outro acaba o quantum de tempo, ja que não tem outra fila para qual eles cairem.
+
 		Comandos:
 			exec aa (9) -> em t=0
 			exec bb (5,5) -> em t=2
@@ -234,106 +245,110 @@ Testes:
 
 	Teste 5)
 
+		Nesse teste são executados tres processos em tempos distintos.
+		Os processos executam a alternam de fila da mesma forma que nos casos anteriores, e a execução continua até que todos eles executem todas as suas rajadas. 
+
 		Comandos:
 			exec aa (10,10) -> em t=0
 			exec bb (5,3) -> em t=6
-			exec cc (10,10) -> em t=15
+			exec cc (10,10) -> em t=11
 
 		Saída:
 			Dormindo
 
 			L1
-			44512
+			45004
 
 			L2
-			44512
-			44512
+			45004
+			45004
 
 			L3
-			44512
-			44512
-			44512
-			44512
+			45004
+			45004
+			45004
+			45004
 
 			L1
-			44513
-			44513
+			45005
 
 			L2
-			44513
+			45005
+			45005
 
 			L3
-			44512
-			44512
-			44512
-			44512 entrou em I/O
-
-			L3
-			44513
-			44513
-			44513 entrou em I/O
+			45004
+			45004
+			45004
+			45004 entrou em I/O
 
 			L1
-			44516
-			44516
+			45007
 
 			L2
-			44512
-			44512
-			44512
+			45007
+			45007
 
 			L2
-			44516
-			44516
+			45004
+			45004
+
+			L3
+			45005
+			45005
+			45005 entrou em I/O
+
+			L3
+			45007
+			45007
+			45007
+			45007
 
 			L2
-			44513
-			44513
-			44513
+			45005
+			45005
 
 			L3
-			44512
-			44512
-			44512
-			44512
+			45004
+			45004
+			45004
+			45004
 
 			L3
-			44516
-			44516
-			44516
-			44516
+			45007
+			45007
+			45007
+			45007 entrou em I/O
 
 			L3
-			44513 terminou
-
-			L3
-			44512
-			44512
-			44512
-			44512 terminou
-
-			L3
-			44516
-			44516
-			44516 entrou em I/O
-			Dormindo
+			45005
+			45005 terminou
 
 			L2
-			44516
-			44516
+			45007
+			45007
 
 			L3
-			44516
-			44516
-			44516
-			44516
+			45004
+			45004
+			45004
+			45004
 
 			L3
-			44516
-			44516
-			44516
-			44516
+			45007
+			45007
+			45007
+			45007
 
 			L3
-			44516 terminou
+			45004 terminou
+
+			L3
+			45007
+			45007
+			45007
+			45007
+
+			L3
+			45007 terminou
 			Dormindo
