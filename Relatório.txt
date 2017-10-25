@@ -6,7 +6,8 @@ Pedro Sousa Meireles	-	1510962
 Julio Neuman Kessel 	-	1511745
 
 Modo de usar:
-	Abra dois terminais. No primeiro, digite os comandos "gcc -o escalonador escalonador.c fila.c" e então "./escalonador". No segundo, digite os comandos "gcc -o interpretador interpretador.c" e então "./interpretador".
+	Abra dois terminais. No primeiro, digite os comandos "gcc -o escalonador escalonador.c fila.c" e então "./escalonador".
+	No segundo, digite os comandos "gcc -o interpretador interpretador.c" e então "./interpretador".
 No segundo terminal devem ser executados os comandos da forma "exec programa (3, 2, 1)". O resultado
 do escalonamento dos programas digitados no interpretador será exibido no primeiro terminal.
 	Para encerrar o programa digite o comando ctrl+c em cada um dos terminais.
@@ -355,7 +356,11 @@ Testes:
 
 Conclusão:
 
-	Utilizamos diversos artificios que vimos em aula, como o envio de sinais e 			memória compartilhada, para enviar informações de um programa para outro.
-	Vimos que, utilizando os metodos citados a cima sobre o funcionamento do 			programa, é possivel alternar entre a execução de diversos processos ou 		programas de forma a minimizar o tempo que leva para processar todos eles.
-	Do ponto de vista do usuario seria como se os processos estivessem executando 		em paralelo ao mesmo tempo, mesmo que na realidade eles estão alternando 		seus tempos de execução entre si.
+	Utilizamos diversos artificios que vimos em aula, como o envio de sinais e memória compartilhada, 
+		para enviar informações de um programa para outro.
+	Vimos que, utilizando os metodos citados a cima sobre o funcionamento do programa, é possivel 
+		alternar entre a execução de diversos processos ou programas de forma a minimizar o 
+		tempo que leva para processar todos eles.
+	Do ponto de vista do usuario seria como se os processos estivessem executando em paralelo ao 
+		mesmo tempo, mesmo que na realidade eles estão alternando seus tempos de execução entre si.
 
