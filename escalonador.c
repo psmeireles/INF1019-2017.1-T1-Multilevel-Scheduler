@@ -78,7 +78,7 @@ void RoundRobin(Fila *f){    // Executa o escalonamento Round Robin da fila rece
         }
     }
     else if(fila_tempo(f) == 4){
-        if(!fila_vazia(level1) || !fila_vazia(level1)){
+        if(!fila_vazia(level1) || !fila_vazia(level2)){
             return;
         }
     }
