@@ -1,0 +1,366 @@
+PUC-Rio	- Trabalho de Sistemas de Computação (INF1019)
+Professor: Markus Endler
+Monitora: Jéssica Almeida
+Alunos:
+Pedro Sousa Meireles	-	1510962
+Julio Neuman Kessel 	-	1511745
+
+Modo de usar:
+	Abra dois terminais. No primeiro, digite os comandos "gcc -o escalonador escalonador.c fila.c" e então "./escalonador".
+	No segundo, digite os comandos "gcc -o interpretador interpretador.c" e então "./interpretador".
+No segundo terminal devem ser executados os comandos da forma "exec programa (3, 2, 1)". O resultado
+do escalonamento dos programas digitados no interpretador será exibido no primeiro terminal.
+	Para encerrar o programa digite o comando ctrl+c em cada um dos terminais.
+
+Funcionamento do programa:
+	O escalonador deve ser executado primeiro, pois ele escreve seu pid em memória compartilhada.
+O interpretador lê essa região de memória e guarda o pid do escalonador para poder sinalizar quando
+houver um novo processo pronto para ser executado.
+	O interpretador funciona com um loop que lê comandos do terminal e cria um novo processo com as 
+rajadas recebidas. Esse processo é guardado em memória compartilhada, que será posteriormente acessada
+pelo escalonador. Os comandos recebidos pelo interpretador são da forma 
+"exec [nome do programa] ([tempos de rajada])", onde os tempos de rajada são separados por vírgulas.
+Após guardar as informações sobre o novo processo na memória compartilhada, o interpretador notifica
+o escalonador para que este saiba que existe um novo processo a ser escalonado.
+	O escalonador, ao ser iniciado, escreve seu pid na região de memória compartilhada que será lida
+pelo interpretador. Ele cria os níveis do escalonador, que são representados por filas. O resto do 
+programa é um loop que executa um RoundRobin em cada fila. Se não houver nenhum processo em nenhuma
+fila o escalonador dorme até receber um processo do interpretador.
+	Antes de começar o RoundRobin verifica-se se existe algum processo em uma fila superior, para que
+se interrompa o RoundRobin no nível atual e os programas do nível superior sejam executados. Essa
+verificação também é feita após a execução de cada programa.
+	A execução de um programa pode ser separada em dois casos:
+	1) Um novo programa:
+		Se o programa a ser executado ainda não passou por nenhum burst de execução, deve ser criado
+		um processo filho para que ele seja executado.
+	2) Um programa no estado "pronto":
+		Se um programa está "pronto" significa que o processo dele já foi criado. Logo, basta mandar
+		um sinal para que ele volte a ser executado.
+	
+	Sobre sinais:
+	
+	Foram utilizados 6 sinais no escalonador.
+	SIGUSR1: Esse sinal é recebido toda vez que um novo processo for recebido pelo interpretador. 
+	Seu tratador aloca a memória necessária para o novo processo e copia os dados da memória compartilhada,
+inserindo-o por fim no nível de maior prioridade do escalonador.
+	SIGUSR2: Esse sinal é recebido quando um processo em execução entra em espera por I/O.
+	Seu tratador interrompe a execução do processo. Ele modifica o campo correspondente à próxima fila do processo e o 
+insere e uma fila de espera por I/O. Ao mesmo tempo ele cria um processo filho que servirá como um alarme.
+Ele espera 3 segundos e manda SIGALRM para o escalonador, notificando-o de que o processo está pronto para 
+voltar a ser executado. Ele modifica o valor de uma flag para que a função ExecutarProcesso possa modificar
+o estado do processo e retornar um valor correspondente ao acontecimento.
+	SIGALRM: Esse sinal é recebido quando terminam os 3 segundos de espera por I/O de um processo.
+	Seu tratador retira um processo da fila e processos em I/O, modifica seu estado para "pronto" e move o
+processo para a fila correta.
+	SIGCHLD: Esse sinal é recebido quando um processo filho é interrompido ou terminado.
+	Seu tratador identifica se esse sinal foi gerado por uma interrupção ou pelo término de um processo filho.
+Se for devido a uma interrupção, ele nada faz. Caso contrário, ele exibe uma mensagem informando que o processo
+terminou e modifica uma flag para que a função ExecutarProcesso possa modificar o estado do processo para "terminado"
+e retornar um valor condizente, informando que a memória alocada deve ser liberada.
+	SIGQUIT e SIGINT: Esses sinais são recebidos quando o processo é terminado pelo terminal.
+O tratador libera toda a memória alocada, além de limpar a memória compartilhada e exibir uma mensagem de término.
+	
+	No interpretador foram utilizados apenas os dois últimos sinais, com o mesmo tratador.
+
+Testes:
+
+	Teste 1)
+
+		Nesse teste foi executado um unico processo com uma unica rajada, o processo executa a rajada em cada fila e conforme acaba o quantum da fila atual ele cai de prioridade.
+		Como só tem uma rajada o processo não entra em IO.
+
+		Comandos: 
+			exec aa (5) -> em t=0
+
+		Saída:
+			Dormindo
+
+			L1
+			44481
+
+			L2
+			44481
+			44481
+
+			L3
+			44481
+			44481
+			44481 terminou
+			Dormindo
+
+	Teste 2)
+
+		Nesse teste ainda só foi executado um processo, mas agora com duas rajadas.
+		O comportamento dele é o mesmo que no exemplo a cima, mas agora depois da primeira rajada o processo entra em IO e depois executa a rajada seguinte.
+		Como não tem nada para ser executado alem desse unico processo, o escalonador "dorme" enquanto ele está em IO.
+
+		Comandos:
+			exec aa (10,5) -> em t=0
+
+		Saída:
+			Dormindo
+
+			L1
+			44491
+
+			L2
+			44491
+			44491
+
+			L3
+			44491
+			44491
+			44491
+			44491
+
+			L3
+			44491
+			44491
+			44491
+			44491 entrou em I/O
+			Dormindo
+
+			L2
+			44491
+			44491
+
+			L3
+			44491
+			44491
+			44491
+			44491 terminou
+			Dormindo
+
+	Teste 3)
+
+		Nesse teste são executados dois processos distintos em tempos diferentes.
+		O comportamento é parecido com o já visto antes, mas quando o segundo processo começa sua execução ele tem prioridade sobre o primeiro processo. Isso porque o processo "bb" é inicialmente inserido na primeira fila de prioridade e nesse momento o processo "aa" está na terceira fila.
+
+		Comandos:
+			exec aa (9,3) -> em t=0
+			exec bb (5,5) -> em t=5
+
+		Saída:
+			Dormindo
+
+			L1
+			44499
+
+			L2
+			44499
+			44499
+
+			L3
+			44499
+			44499
+			44499
+			44499
+
+			L1
+			44500
+
+			L2
+			44500
+			44500
+
+			L3
+			44499
+			44499
+			44499 entrou em I/O
+
+			L3
+			44500
+			44500
+			44500 entrou em I/O
+
+			L2
+			44499
+			44499
+
+			L3
+			44499
+			44499 terminou
+
+			L2
+			44500
+			44500
+
+			L3
+			44500
+			44500
+			44500
+			44500 terminou
+			Dormindo
+
+	Teste 4)
+
+		Nesse teste tambem são executados dois processos. Nesse exemplo é possivel perceber que quando os dois processos estão na ultima fila eles ficam alternando prioridade entre si conforme o outro acaba o quantum de tempo, ja que não tem outra fila para qual eles cairem.
+
+		Comandos:
+			exec aa (9) -> em t=0
+			exec bb (5,5) -> em t=2
+
+		Saída:
+			Dormindo
+
+			L1
+			44505
+
+			L2
+			44505
+			44505
+
+			L1
+			44506
+
+			L2
+			44506
+			44506
+
+			L3
+			44505
+			44505
+			44505
+			44505
+
+			L3
+			44506
+			44506
+			44506 entrou em I/O
+
+			L3
+			44505
+			44505
+			44505 terminou
+
+			L2
+			44506
+			44506
+
+			L3
+			44506
+			44506
+			44506
+			44506 terminou
+			Dormindo
+
+	Teste 5)
+
+		Nesse teste são executados tres processos em tempos distintos.
+		Os processos executam a alternam de fila da mesma forma que nos casos anteriores, e a execução continua até que todos eles executem todas as suas rajadas. 
+
+		Comandos:
+			exec aa (10,10) -> em t=0
+			exec bb (5,3) -> em t=6
+			exec cc (10,10) -> em t=11
+
+		Saída:
+			Dormindo
+
+			L1
+			45004
+
+			L2
+			45004
+			45004
+
+			L3
+			45004
+			45004
+			45004
+			45004
+
+			L1
+			45005
+
+			L2
+			45005
+			45005
+
+			L3
+			45004
+			45004
+			45004
+			45004 entrou em I/O
+
+			L1
+			45007
+
+			L2
+			45007
+			45007
+
+			L2
+			45004
+			45004
+
+			L3
+			45005
+			45005
+			45005 entrou em I/O
+
+			L3
+			45007
+			45007
+			45007
+			45007
+
+			L2
+			45005
+			45005
+
+			L3
+			45004
+			45004
+			45004
+			45004
+
+			L3
+			45007
+			45007
+			45007
+			45007 entrou em I/O
+
+			L3
+			45005
+			45005 terminou
+
+			L2
+			45007
+			45007
+
+			L3
+			45004
+			45004
+			45004
+			45004
+
+			L3
+			45007
+			45007
+			45007
+			45007
+
+			L3
+			45004 terminou
+
+			L3
+			45007
+			45007
+			45007
+			45007
+
+			L3
+			45007 terminou
+			Dormindo
+
+Conclusão:
+
+	Utilizamos diversos artificios que vimos em aula, como o envio de sinais e memória compartilhada, 
+		para enviar informações de um programa para outro.
+	Vimos que, utilizando os metodos citados a cima sobre o funcionamento do programa, é possivel 
+		alternar entre a execução de diversos processos ou programas de forma a minimizar o 
+		tempo que leva para processar todos eles.
+	Do ponto de vista do usuario seria como se os processos estivessem executando em paralelo ao 
+		mesmo tempo, mesmo que na realidade eles estão alternando seus tempos de execução entre si.
+
