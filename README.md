@@ -55,14 +55,14 @@ a signal for it to resume execution.
 ## Signals
 
 Six signals were used in the scheduler.
-* SIGUSR1
+* **SIGUSR1**
 
   This signal is received every time a new process is received by the interpreter.
   
   Its handler allocates the memory required for the new process and copies the data from the shared memory,
 finally pushing it to the higher priority level of the scheduler.
 
-* SIGUSR2
+* **SIGUSR2**
 
   This signal is received when a running process waits for I / O.
 
@@ -73,13 +73,14 @@ inserts it into a queue for I / O. At the same time it creates a child process t
 run again. It modifies the value of a flag so that the ExecutarProcesso function can modify
 the state of the process and return a value corresponding to the event.
 
-* SIGALRM
+* **SIGALRM**
+
   This signal is received when the 3-second wait for I / O of a process ends.
   
   Its handler removes a process from the I / O queue, modifies its state to "ready" and moves the
 process to the correct queue.
 
-* SIGCHLD
+* **SIGCHLD**
 
   This signal is received when a child process is interrupted or terminated.
   
@@ -88,7 +89,7 @@ If it is due to an interruption, it does nothing. Otherwise, it displays a messa
 has terminated and modifies a flag so that the ExecutarProcesso function can modify the state of the process to "finished"
 and return a value, stating that the allocated memory must be released.
 
-* SIGQUIT and SIGINT
+* **SIGQUIT** and **SIGINT**
 
   These signals are received when the process is terminated by the terminal.
   
